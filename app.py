@@ -1,25 +1,25 @@
+
 from flask import Flask, request, jsonify
-import main
+from main import process_pdf_url
 
 app = Flask(__name__)
 
-@app.route("/", methods=["POST"])
-def handle_webhook():
+@app.route("/", methods=["GET"])
+def home():
+    return "SmartOps GreaseGuardian Agent is live!"
+
+@app.route("/process", methods=["POST"])
+def process():
+    data = request.get_json()
+    if not data or "pdf_url" not in data:
+        return jsonify({"error": "Missing 'pdf_url' in request"}), 400
+
+    pdf_url = data["pdf_url"]
     try:
-        data = request.get_json()
-        pdf_url = data.get("pdf_url")
-        if not pdf_url:
-            return jsonify({"error": "No PDF URL provided"}), 400
-
-        result = main.run_agent(pdf_url)
-        return jsonify({"status": "success", "message": result}), 200
-
+        result = process_pdf_url(pdf_url)
+        return jsonify({"message": "Processing successful", "result": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/", methods=["GET"])
-def index():
-    return "SmartOps Agent is live!", 200
-
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
