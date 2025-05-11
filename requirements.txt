@@ -3,3 +3,4 @@ PyMuPDF
 gspread
 oauth2client
 requests
+gunicorn
